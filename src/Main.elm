@@ -2,6 +2,7 @@ module Main exposing (main)
 
 import Browser
 import Html exposing (..)
+import Html.Attributes exposing (href, rel, target)
 import Http
 import Json.Decode exposing (Decoder, field, string)
 
@@ -89,7 +90,9 @@ view model =
 
 renderPost : Post -> Html Message
 renderPost post =
-    li [] [ text post.title ]
+    li []
+        [ a [ href post.link, rel "noopener noreferrer", target "_blank" ] [ text post.title ]
+        ]
 
 
 viewPosts : Model -> Html Message
@@ -119,7 +122,7 @@ fetchPosts : Flags -> Cmd Message
 fetchPosts flags =
     Http.request
         { method = "GET"
-        , url = "https://rhdtxwxbqieflugetslw.supabase.co/rest/v1/post?select=*"
+        , url = "https://rhdtxwxbqieflugetslw.supabase.co/rest/v1/posts?select=*"
         , expect = Http.expectJson FetchedPosts (Json.Decode.list postsDecoder)
         , headers =
             [ Http.header "apikey" flags.supabase_api_key
