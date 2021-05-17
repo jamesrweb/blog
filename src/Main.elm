@@ -38,13 +38,12 @@ type Model
 
 
 type alias Flags =
-    { supabase_api_key : String
-    }
+    String
 
 
 init : Flags -> ( Model, Cmd Message )
-init flags =
-    ( Loading, fetchPosts flags )
+init supabase_api_key =
+    ( Loading, fetchPosts supabase_api_key )
 
 
 
@@ -82,21 +81,6 @@ subscriptions _ =
 
 view : Model -> Html Message
 view model =
-    div []
-        [ h2 [] [ text "Latest posts" ]
-        , viewPosts model
-        ]
-
-
-renderPost : Post -> Html Message
-renderPost post =
-    li []
-        [ a [ href post.link, rel "noopener noreferrer", target "_blank" ] [ text post.title ]
-        ]
-
-
-viewPosts : Model -> Html Message
-viewPosts model =
     case model of
         Failure ->
             div []
@@ -106,12 +90,27 @@ viewPosts model =
             text "Loading posts..."
 
         Success posts ->
-            case posts of
-                [] ->
-                    text "No posts are currently available"
+            div []
+                [ h2 [] [ text "Latest posts" ]
+                , viewPosts posts
+                ]
 
-                _ ->
-                    ul [] (List.map renderPost posts)
+
+renderPost : Post -> Html Message
+renderPost post =
+    li []
+        [ a [ href post.link, rel "noopener noreferrer", target "_blank" ] [ text post.title ]
+        ]
+
+
+viewPosts : List Post -> Html Message
+viewPosts posts =
+    case posts of
+        [] ->
+            text "No posts are currently available"
+
+        _ ->
+            ul [] (List.map renderPost posts)
 
 
 
@@ -119,14 +118,14 @@ viewPosts model =
 
 
 fetchPosts : Flags -> Cmd Message
-fetchPosts flags =
+fetchPosts supabase_api_key =
     Http.request
         { method = "GET"
         , url = "https://rhdtxwxbqieflugetslw.supabase.co/rest/v1/posts?select=*"
         , expect = Http.expectJson FetchedPosts (Json.Decode.list postsDecoder)
         , headers =
-            [ Http.header "apikey" flags.supabase_api_key
-            , Http.header "Authorization" ((++) "Bearer" flags.supabase_api_key)
+            [ Http.header "apikey" supabase_api_key
+            , Http.header "Authorization" ((++) "Bearer" supabase_api_key)
             ]
         , body = Http.emptyBody
         , timeout = Nothing
