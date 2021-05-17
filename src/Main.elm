@@ -1,10 +1,10 @@
 module Main exposing (main)
 
 import Browser
-import Html as H
-import Html.Attributes as A
+import Html
 import Http
-import Json.Decode as D
+import Html.Attributes as Attributes
+import Json.Decode as Decode
 
 
 
@@ -79,46 +79,46 @@ subscriptions _ =
 -- VIEW
 
 
-view : Model -> H.Html Message
+view : Model -> Html.Html Message
 view model =
     case model of
         Failure ->
-            H.div []
-                [ H.text "I couldn't load posts right now, perhaps try refreshing your browser or come back again later?" ]
+            Html.div []
+                [ Html.text "I couldn't load posts right now, perhaps try refreshing your browser or come back again later?" ]
 
         Loading ->
-            H.text "Loading posts..."
+            Html.text "Loading posts..."
 
         Success posts ->
-            H.div []
-                [ H.h2 [] [ H.text "Latest posts" ]
+            Html.div []
+                [ Html.h2 [] [ Html.text "Latest posts" ]
                 , viewPosts posts
                 ]
 
 
-renderLink : String -> String -> H.Html Message
+renderLink : String -> String -> Html.Html Message
 renderLink link content =
-    H.a
-        [ A.href link
-        , A.rel "noopener noreferrer"
-        , A.target "_blank"
+    Html.a
+        [ Attributes.href link
+        , Attributes.rel "noopener noreferrer"
+        , Attributes.target "_blank"
         ]
-        [ H.text content ]
+        [ Html.text content ]
 
 
-renderPost : Post -> H.Html Message
+renderPost : Post -> Html.Html Message
 renderPost post =
-    H.li [] [ renderLink post.link post.title ]
+    Html.li [] [ renderLink post.link post.title ]
 
 
-viewPosts : List Post -> H.Html Message
+viewPosts : List Post -> Html.Html Message
 viewPosts posts =
     case posts of
         [] ->
-            H.text "No posts are currently available"
+            Html.text "No posts are currently available"
 
         _ ->
-            H.ul [] (List.map renderPost posts)
+            Html.ul [] (List.map renderPost posts)
 
 
 
@@ -130,7 +130,7 @@ fetchPosts supabase_api_key =
     Http.request
         { method = "GET"
         , url = "https://rhdtxwxbqieflugetslw.supabase.co/rest/v1/posts?select=*"
-        , expect = Http.expectJson FetchedPosts (D.list postsDecoder)
+        , expect = Http.expectJson FetchedPosts (Decode.list postsDecoder)
         , headers =
             [ Http.header "apikey" supabase_api_key
             , Http.header "Authorization" ((++) "Bearer" supabase_api_key)
@@ -141,8 +141,8 @@ fetchPosts supabase_api_key =
         }
 
 
-postsDecoder : D.Decoder Post
+postsDecoder : Decode.Decoder Post
 postsDecoder =
-    D.map2 Post
-        (D.field "title" D.string)
-        (D.field "link" D.string)
+    Decode.map2 Post
+        (Decode.field "title" Decode.string)
+        (Decode.field "link" Decode.string)
