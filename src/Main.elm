@@ -1,10 +1,10 @@
 module Main exposing (main)
 
 import Browser
-import Html exposing (..)
-import Html.Attributes exposing (href, rel, target)
+import Html as H
+import Html.Attributes as A
 import Http
-import Json.Decode exposing (Decoder, field, string)
+import Json.Decode as D
 
 
 
@@ -79,38 +79,46 @@ subscriptions _ =
 -- VIEW
 
 
-view : Model -> Html Message
+view : Model -> H.Html Message
 view model =
     case model of
         Failure ->
-            div []
-                [ text "I couldn't load posts right now, perhaps try refreshing your browser or come back again later?" ]
+            H.div []
+                [ H.text "I couldn't load posts right now, perhaps try refreshing your browser or come back again later?" ]
 
         Loading ->
-            text "Loading posts..."
+            H.text "Loading posts..."
 
         Success posts ->
-            div []
-                [ h2 [] [ text "Latest posts" ]
+            H.div []
+                [ H.h2 [] [ H.text "Latest posts" ]
                 , viewPosts posts
                 ]
 
 
-renderPost : Post -> Html Message
-renderPost post =
-    li []
-        [ a [ href post.link, rel "noopener noreferrer", target "_blank" ] [ text post.title ]
+renderLink : String -> String -> H.Html Message
+renderLink link content =
+    H.a
+        [ A.href link
+        , A.rel "noopener noreferrer"
+        , A.target "_blank"
         ]
+        [ H.text content ]
 
 
-viewPosts : List Post -> Html Message
+renderPost : Post -> H.Html Message
+renderPost post =
+    H.li [] [ renderLink post.link post.title ]
+
+
+viewPosts : List Post -> H.Html Message
 viewPosts posts =
     case posts of
         [] ->
-            text "No posts are currently available"
+            H.text "No posts are currently available"
 
         _ ->
-            ul [] (List.map renderPost posts)
+            H.ul [] (List.map renderPost posts)
 
 
 
@@ -122,7 +130,7 @@ fetchPosts supabase_api_key =
     Http.request
         { method = "GET"
         , url = "https://rhdtxwxbqieflugetslw.supabase.co/rest/v1/posts?select=*"
-        , expect = Http.expectJson FetchedPosts (Json.Decode.list postsDecoder)
+        , expect = Http.expectJson FetchedPosts (D.list postsDecoder)
         , headers =
             [ Http.header "apikey" supabase_api_key
             , Http.header "Authorization" ((++) "Bearer" supabase_api_key)
@@ -133,8 +141,8 @@ fetchPosts supabase_api_key =
         }
 
 
-postsDecoder : Decoder Post
+postsDecoder : D.Decoder Post
 postsDecoder =
-    Json.Decode.map2 Post
-        (field "title" string)
-        (field "link" string)
+    D.map2 Post
+        (D.field "title" D.string)
+        (D.field "link" D.string)
