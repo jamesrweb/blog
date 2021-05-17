@@ -51,9 +51,17 @@ module.exports = {
 			title: "James Robb | Blog",
 			inject: false,
 			templateContent: ({ htmlWebpackPlugin }) => `
-        <html>
+		<!DOCTYPE html>
+        <html lang="en">
           <head>
             ${htmlWebpackPlugin.tags.headTags}
+			<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<meta name="description" content="The latest blog posts of James Robb all in one place."/>
+			<meta name="keywords" content="James Robb, Blog, Latest, Programming, Data Structures, Algorithms, Politics, History"/>
+			<meta name="author" content="James Robb" />
+			<meta name="copyright" content="James Robb" />
+			<meta name="robots" content="index,follow"/>
             <title>James Robb | Blog</title>
           </head>
           <body>
