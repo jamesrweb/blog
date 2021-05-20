@@ -1,15 +1,13 @@
 module Main exposing (main)
 
 import Browser
-import Css
-import Css.Global
-import Css.Reset as Reset
 import Date
 import Html.Styled as Styled
 import Html.Styled.Attributes as Attributes
 import Http
 import Iso8601
 import Json.Decode as Decode
+import Styles
 import Time
 
 
@@ -88,23 +86,13 @@ subscriptions _ =
 
 view : Model -> Styled.Html Message
 view model =
-    Styled.div
-        [ Attributes.css
-            [ Css.padding (Css.rem 2)
-            , Css.fontFamily Css.sansSerif
-            , Css.fontSize (Css.rem 1.25)
-            , Css.maxWidth (Css.rem 45)
-            , Css.margin2 (Css.rem 0) Css.auto
-            ]
-        ]
-        [ Reset.meyerV2
-        , Reset.borderBoxV201408
-        , Css.Global.global
-            [ Css.Global.selector "html" [ Css.fontSize (Css.px 16) ]
-            ]
-        , viewHeader
-        , viewForModel model
-        ]
+    let
+        externalStylesheets =
+            Styles.global :: Styles.reset
+    in
+    Styled.main_
+        [ Styles.container ]
+        (externalStylesheets ++ [ viewHeader, viewForModel model ])
 
 
 viewForModel : Model -> Styled.Html Message
@@ -118,58 +106,37 @@ viewForModel model =
             Styled.p [] [ Styled.text "Loading posts..." ]
 
         Success posts ->
-            Styled.main_ [] [ viewPosts posts ]
+            viewPosts posts
 
 
 viewHeader : Styled.Html Message
 viewHeader =
-    Styled.header
-        [ Attributes.css
-            [ Css.padding2 (Css.rem 3) (Css.rem 0)
-            , Css.textAlign Css.center
-            , Css.fontSize (Css.rem 3)
-            ]
-        ]
-        [ Styled.h1 [] [ Styled.text "Latest posts" ] ]
+    Styled.header [ Styles.header ] [ Styled.h1 [] [ Styled.text "Latest posts" ] ]
 
 
-viewLink : Post -> Styled.Html Message
-viewLink post =
+viewPostLink : Post -> Styled.Html Message
+viewPostLink post =
     Styled.a
-        [ Attributes.href post.link
+        [ Styles.link
+        , Attributes.href post.link
         , Attributes.rel "noopener noreferrer"
         , Attributes.target "_blank"
-        , Attributes.css
-            [ Css.color Css.currentColor
-            , Css.textDecoration Css.none
-            , Css.display Css.inlineBlock
-            ]
         ]
-        [ viewPostTitle post.title
-        , viewTime post.published
-        ]
+        [ viewPostTitle post.title, viewTime post.published ]
 
 
 viewPostTitle : String -> Styled.Html Message
 viewPostTitle title =
-    Styled.h2
-        [ Attributes.css
-            [ Css.fontSize (Css.rem 1.5)
-            , Css.marginBottom (Css.rem 0.5)
-            ]
-        ]
-        [ Styled.text title ]
+    Styled.h2 [ Styles.postTitle ] [ Styled.text title ]
 
 
 viewTime : String -> Styled.Html Message
 viewTime timestamp =
     Styled.time
-        [ Attributes.css
-            [ Css.fontSize (Css.rem 1)
-            ]
+        [ Styles.time
         , Attributes.datetime timestamp
         ]
-        [ Styled.text (String.join " " [ "Published on the", formatDate timestamp ]) ]
+        [ Styled.text ("Published on the " ++ formatDate timestamp) ]
 
 
 parseISO8601 : String -> Maybe Time.Posix
@@ -204,15 +171,7 @@ formatDate timestamp =
 
 viewPost : Post -> Styled.Html Message
 viewPost post =
-    Styled.li
-        [ Attributes.css
-            [ Css.padding2 (Css.rem 2) (Css.rem 2)
-            , Css.borderRadius (Css.rem 0.25)
-            , Css.boxShadow5 (Css.rem 0) (Css.rem 0.25) (Css.rem 0.5) (Css.rem 0) (Css.rgba 0 0 0 0.2)
-            , Css.marginBottom (Css.rem 1.5)
-            ]
-        ]
-        [ viewLink post ]
+    Styled.li [ Styles.post ] [ viewPostLink post ]
 
 
 viewPosts : List Post -> Styled.Html Message
@@ -222,13 +181,7 @@ viewPosts posts =
             Styled.text "No posts are currently available"
 
         _ ->
-            Styled.ul
-                [ Attributes.css
-                    [ Css.listStyle Css.none
-                    , Css.padding (Css.rem 0)
-                    ]
-                ]
-                (List.map viewPost posts)
+            Styled.ul [ Styles.postList ] (List.map viewPost posts)
 
 
 
@@ -243,7 +196,7 @@ fetchPosts supabase_api_key =
         , expect = Http.expectJson FetchedPosts (Decode.list postsDecoder)
         , headers =
             [ Http.header "apikey" supabase_api_key
-            , Http.header "Authorization" ((++) "Bearer" supabase_api_key)
+            , Http.header "Authorization" ("Bearer " ++ supabase_api_key)
             ]
         , body = Http.emptyBody
         , timeout = Nothing
