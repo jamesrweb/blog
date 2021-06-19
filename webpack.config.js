@@ -47,8 +47,9 @@ module.exports = {
 	},
 	plugins: [
 		new webpack.NoEmitOnErrorsPlugin(),
-		new HtmlWebpackPlugin({
-			title: 'James Robb | Blog'
+		new HtmlWebpackPlugin({	
+			author: "James Robb",
+			title: "James Robb | Blog"
 		}),
 		new webpack.DefinePlugin({
 			'process.env': JSON.stringify(env.parsed)
