@@ -48,7 +48,7 @@ module.exports = {
 	plugins: [
 		new webpack.NoEmitOnErrorsPlugin(),
 		new HtmlWebpackPlugin({
-			title: 'Porta Products | Index Logs'
+			title: 'James Robb | Blog'
 		}),
 		new webpack.DefinePlugin({
 			'process.env': JSON.stringify(env.parsed)
