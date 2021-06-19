@@ -1,16 +1,16 @@
-const { resolve } = require("path");
-const webpack = require("webpack");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const env = require("dotenv").config();
+const { resolve } = require('path');
+const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const env = require('dotenv').config();
 
 const { ENV } = process.env;
 
-const outputDirectory = resolve(__dirname, "dist");
+const outputDirectory = resolve(__dirname, 'dist');
 
-const isProduction = ENV === "production";
+const isProduction = ENV === 'production';
 
 const elmLoader = {
-	loader: "elm-webpack-loader",
+	loader: 'elm-webpack-loader',
 	options: {
 		debug: false,
 		optimize: isProduction,
@@ -20,21 +20,21 @@ const elmLoader = {
 
 const loaders = isProduction
 	? elmLoader
-	: [{ loader: "elm-hot-webpack-loader" }, elmLoader];
+	: [{ loader: 'elm-hot-webpack-loader' }, elmLoader];
 
 module.exports = {
-	mode: isProduction ? "production" : "development",
-	entry: "./src/index.js",
+	mode: isProduction ? 'production' : 'development',
+	entry: './src/index.js',
 	devServer: {
-		publicPath: "/",
+		publicPath: '/',
 		contentBase: outputDirectory,
 		port: 8000,
 		hotOnly: true
 	},
 	output: {
-		publicPath: "/",
+		publicPath: '/',
 		path: outputDirectory,
-		filename: "bundle.js"
+		filename: '[name].[contenthash].bundle.js'
 	},
 	module: {
 		rules: [
@@ -48,11 +48,10 @@ module.exports = {
 	plugins: [
 		new webpack.NoEmitOnErrorsPlugin(),
 		new HtmlWebpackPlugin({
-			author: "James Robb",
-			title: "James Robb | Blog"
+			title: 'Porta Products | Index Logs'
 		}),
 		new webpack.DefinePlugin({
-			"process.env": JSON.stringify(env.parsed)
+			'process.env': JSON.stringify(env.parsed)
 		})
 	]
 };
