@@ -1,6 +1,6 @@
 module API.API exposing (ApiResponse, apiResponseDecoder)
 
-import API.Post exposing (Posts, postsDecoder)
+import API.Post exposing (ForemPosts, postsDecoder)
 import Json.Decode as Decode
 
 
@@ -9,7 +9,7 @@ import Json.Decode as Decode
 
 
 type alias ApiResponse =
-    { posts : Posts
+    { posts : ForemPosts
     }
 
 
@@ -19,5 +19,4 @@ type alias ApiResponse =
 
 apiResponseDecoder : Decode.Decoder ApiResponse
 apiResponseDecoder =
-    Decode.map ApiResponse
-        (Decode.field "posts" <| postsDecoder)
+    Decode.map ApiResponse postsDecoder

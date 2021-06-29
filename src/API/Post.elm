@@ -1,4 +1,4 @@
-module API.Post exposing (Post, Posts, postDecoder, postsDecoder, viewPosts)
+module API.Post exposing (ForemPost, ForemPosts, postsDecoder, viewPosts)
 
 import Date
 import Html.Styled as Styled
@@ -14,25 +14,28 @@ import Time
 -- Model
 
 
-type alias Post =
-    { bodyMarkdown : String
-    , canonicalUrl : String
+type alias ForemPost =
+    { canonicalUrl : String
+    , collectionId : Maybe Int
     , commentsCount : Int
-    , coverImage : String
+    , coverImage : Maybe String
+    , createdAt : String
+    , crosspostedAt : Maybe String
     , description : String
-    , flareTag : ForemFlareTag
+    , editedAt : Maybe String
     , id : Int
-    , organization : ForemOrganisation
-    , pageViewsCount : Int
+    , lastCommentAt : Maybe String
     , path : String
     , positiveReactionsCount : Int
     , publicReactionsCount : Int
-    , published : Bool
     , publishedAt : String
     , publishedTimestamp : String
+    , readablePublishDate : String
     , readingTimeMinutes : Int
     , slug : String
+    , socialImage : String
     , tagList : List String
+    , tags : String
     , title : String
     , typeOf : String
     , url : String
@@ -40,8 +43,8 @@ type alias Post =
     }
 
 
-type alias Posts =
-    List Post
+type alias ForemPosts =
+    List ForemPost
 
 
 type alias ForemUser =
@@ -49,25 +52,9 @@ type alias ForemUser =
     , name : String
     , profileImage : String
     , profileImage90 : String
-    , twitterUsername : String
+    , twitterUsername : Maybe String
     , username : String
     , websiteUrl : String
-    }
-
-
-type alias ForemOrganisation =
-    { name : String
-    , profileImage : String
-    , profileImage90 : String
-    , slug : String
-    , username : String
-    }
-
-
-type alias ForemFlareTag =
-    { bgColorHex : String
-    , name : String
-    , textColorHex : String
     }
 
 
@@ -75,7 +62,7 @@ type alias ForemFlareTag =
 -- View
 
 
-viewPosts : List Post -> Styled.Html msg
+viewPosts : List ForemPost -> Styled.Html msg
 viewPosts posts =
     case posts of
         [] ->
@@ -85,12 +72,12 @@ viewPosts posts =
             Styled.ul [ Styles.postList ] (List.map viewPost posts)
 
 
-viewPost : Post -> Styled.Html msg
+viewPost : ForemPost -> Styled.Html msg
 viewPost post =
     Styled.li [ Styles.post ] [ viewPostLink post ]
 
 
-viewPostLink : Post -> Styled.Html msg
+viewPostLink : ForemPost -> Styled.Html msg
 viewPostLink post =
     Styled.a
         [ Styles.link
@@ -149,63 +136,48 @@ parseISO8601 timestamp =
 -- HTTP
 
 
-postDecoder : Decode.Decoder Post
+postDecoder : Decode.Decoder ForemPost
 postDecoder =
-    Decode.succeed Post
-        |> Pipeline.required "body_markdown" Decode.string
+    Decode.succeed ForemPost
         |> Pipeline.required "canonical_url" Decode.string
+        |> Pipeline.required "collection_id" (Decode.maybe Decode.int)
         |> Pipeline.required "comments_count" Decode.int
-        |> Pipeline.required "cover_image" Decode.string
+        |> Pipeline.required "cover_image" (Decode.maybe Decode.string)
+        |> Pipeline.required "created_at" Decode.string
+        |> Pipeline.required "crossposted_at" (Decode.maybe Decode.string)
         |> Pipeline.required "description" Decode.string
-        |> Pipeline.required "flare_tag" foremFlareTagDecoder
+        |> Pipeline.required "edited_at" (Decode.maybe Decode.string)
         |> Pipeline.required "id" Decode.int
-        |> Pipeline.required "organization" foremOrganizationDecoder
-        |> Pipeline.required "page_views_count" Decode.int
+        |> Pipeline.required "last_comment_at" (Decode.maybe Decode.string)
         |> Pipeline.required "path" Decode.string
         |> Pipeline.required "positive_reactions_count" Decode.int
         |> Pipeline.required "public_reactions_count" Decode.int
-        |> Pipeline.required "published" Decode.bool
         |> Pipeline.required "published_at" Decode.string
         |> Pipeline.required "published_timestamp" Decode.string
+        |> Pipeline.required "readable_publish_date" Decode.string
         |> Pipeline.required "reading_time_minutes" Decode.int
         |> Pipeline.required "slug" Decode.string
+        |> Pipeline.required "social_image" Decode.string
         |> Pipeline.required "tag_list" (Decode.list Decode.string)
+        |> Pipeline.required "tags" Decode.string
         |> Pipeline.required "title" Decode.string
         |> Pipeline.required "type_of" Decode.string
         |> Pipeline.required "url" Decode.string
         |> Pipeline.required "user" foremUserDecoder
 
 
-postsDecoder : Decode.Decoder Posts
+postsDecoder : Decode.Decoder ForemPosts
 postsDecoder =
     Decode.list postDecoder
 
 
 foremUserDecoder : Decode.Decoder ForemUser
 foremUserDecoder =
-    Decode.map7 ForemUser
-        (Decode.field "github_username" Decode.string)
-        (Decode.field "name" Decode.string)
-        (Decode.field "profile_image" Decode.string)
-        (Decode.field "profile_image_90" Decode.string)
-        (Decode.field "twitter_username" Decode.string)
-        (Decode.field "username" Decode.string)
-        (Decode.field "website_url" Decode.string)
-
-
-foremOrganizationDecoder : Decode.Decoder ForemOrganisation
-foremOrganizationDecoder =
-    Decode.map5 ForemOrganisation
-        (Decode.field "name" Decode.string)
-        (Decode.field "profile_image" Decode.string)
-        (Decode.field "profile_image_90" Decode.string)
-        (Decode.field "slug" Decode.string)
-        (Decode.field "username" Decode.string)
-
-
-foremFlareTagDecoder : Decode.Decoder ForemFlareTag
-foremFlareTagDecoder =
-    Decode.map3 ForemFlareTag
-        (Decode.field "bg_color_hex" Decode.string)
-        (Decode.field "name" Decode.string)
-        (Decode.field "text_color_hex" Decode.string)
+    Decode.succeed ForemUser
+        |> Pipeline.required "github_username" Decode.string
+        |> Pipeline.required "name" Decode.string
+        |> Pipeline.required "profile_image" Decode.string
+        |> Pipeline.required "profile_image_90" Decode.string
+        |> Pipeline.required "twitter_username" (Decode.maybe Decode.string)
+        |> Pipeline.required "username" Decode.string
+        |> Pipeline.required "website_url" Decode.string
