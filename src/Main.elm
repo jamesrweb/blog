@@ -3,9 +3,9 @@ module Main exposing (main)
 import API.API exposing (ApiResponse, apiResponseDecoder)
 import API.Post exposing (ForemPosts, viewPosts)
 import Browser
-import Html.Styled as Styled
+import Html exposing (Html)
+import Html.Attributes
 import Http
-import Styles
 
 
 
@@ -18,7 +18,7 @@ main =
         { init = init
         , update = update
         , subscriptions = subscriptions
-        , view = view >> Styled.toUnstyled
+        , view = view
         }
 
 
@@ -74,28 +74,26 @@ subscriptions _ =
 -- VIEW
 
 
-view : Model -> Styled.Html Message
+view : Model -> Html Message
 view model =
-    Styled.main_
-        [ Styles.container ]
-        ((Styles.global :: Styles.reset)
-            ++ [ Styled.header [ Styles.header ]
-                    [ Styled.h1 [] [ Styled.text "Latest posts" ]
-                    ]
-               , viewForModel model
-               ]
-        )
+    Html.main_
+        [ Html.Attributes.class "container" ]
+        [ Html.header []
+            [ Html.h1 [ Html.Attributes.class "display-2 mt-3 mb-4 mb-md-5 text-center" ] [ Html.text "Latest posts" ]
+            ]
+        , viewForModel model
+        ]
 
 
-viewForModel : Model -> Styled.Html Message
+viewForModel : Model -> Html Message
 viewForModel model =
     case model of
         Failure ->
-            Styled.p []
-                [ Styled.text "I couldn't load posts right now, perhaps try refreshing your browser or come back again later?" ]
+            Html.p []
+                [ Html.text "I couldn't load posts right now, perhaps try refreshing your browser or come back again later?" ]
 
         Loading ->
-            Styled.p [] [ Styled.text "Loading posts..." ]
+            Html.p [] [ Html.text "Loading posts..." ]
 
         Success posts ->
             viewPosts posts

@@ -1,12 +1,11 @@
 module API.Post exposing (ForemPost, ForemPosts, postsDecoder, viewPosts)
 
 import Date
-import Html.Styled as Styled
-import Html.Styled.Attributes as Attributes
+import Html exposing (Html)
+import Html.Attributes
 import Iso8601
 import Json.Decode as Decode
 import Json.Decode.Pipeline as Pipeline
-import Styles
 import Time
 
 
@@ -62,44 +61,62 @@ type alias ForemUser =
 -- View
 
 
-viewPosts : List ForemPost -> Styled.Html msg
+viewPosts : List ForemPost -> Html msg
 viewPosts posts =
     case posts of
         [] ->
-            Styled.text "No posts are currently available"
+            Html.text "No posts are currently available"
 
         _ ->
-            Styled.ul [ Styles.postList ] (List.map viewPost posts)
+            Html.ul [ Html.Attributes.class "list-unstyled row g-2" ] (List.map viewPost posts)
 
 
-viewPost : ForemPost -> Styled.Html msg
+viewPost : ForemPost -> Html msg
 viewPost post =
-    Styled.li [ Styles.post ] [ viewPostLink post ]
+    Html.li [ Html.Attributes.class "col-12" ] [ viewPostCard post ]
 
 
-viewPostLink : ForemPost -> Styled.Html msg
-viewPostLink post =
-    Styled.a
-        [ Styles.link
-        , Attributes.href post.url
-        , Attributes.rel "noopener noreferrer"
-        , Attributes.target "_blank"
+viewPostCard : ForemPost -> Html msg
+viewPostCard post =
+    Html.article [ Html.Attributes.class "card h-100" ]
+        [ Html.div [ Html.Attributes.class "card-body d-flex flex-column justify-content-between gap-3" ]
+            [ viewPostTitle post
+            , viewPublishedDate post.publishedAt
+            , viewPostPreview post
+            ]
         ]
-        [ viewPostTitle post.title, viewTime post.publishedAt ]
 
 
-viewPostTitle : String -> Styled.Html msg
-viewPostTitle title =
-    Styled.h2 [ Styles.postTitle ] [ Styled.text title ]
-
-
-viewTime : String -> Styled.Html msg
-viewTime timestamp =
-    Styled.time
-        [ Styles.time
-        , Attributes.datetime timestamp
+viewPostPreview : ForemPost -> Html msg
+viewPostPreview post =
+    Html.p []
+        [ Html.text (post.description ++ " ")
+        , viewPostReadMoreLink post
+        , Html.text "."
         ]
-        [ Styled.text ("Published on the " ++ formatDate timestamp) ]
+
+
+viewPostReadMoreLink : ForemPost -> Html msg
+viewPostReadMoreLink post =
+    Html.a
+        [ Html.Attributes.href post.url
+        , Html.Attributes.rel "noopener noreferrer"
+        , Html.Attributes.target "_blank"
+        ]
+        [ Html.text ("continue reading \"" ++ post.title ++ "\"") ]
+
+
+viewPostTitle : ForemPost -> Html msg
+viewPostTitle post =
+    Html.h2 [ Html.Attributes.class "display-6 m-0" ] [ Html.text post.title ]
+
+
+viewPublishedDate : String -> Html msg
+viewPublishedDate timestamp =
+    Html.time
+        [ Html.Attributes.datetime timestamp
+        ]
+        [ Html.text ("Published on the " ++ formatDate timestamp) ]
 
 
 formatDate : String -> String
