@@ -121,32 +121,15 @@ viewPublishedDate timestamp =
 
 formatDate : String -> String
 formatDate timestamp =
-    let
-        date =
-            parseISO8601 timestamp
-                |> Maybe.withDefault (Time.millisToPosix 0)
-                |> Date.fromPosix Time.utc
-
-        day =
-            String.fromInt (Date.weekdayNumber date)
-
-        month =
-            String.fromInt (Date.monthNumber date)
-
-        year =
-            String.fromInt (Date.year date)
-    in
-    String.join "/" [ day, month, year ]
+    parseISO8601 timestamp
+        |> Maybe.withDefault (Time.millisToPosix 0)
+        |> Date.fromPosix Time.utc
+        |> Date.format "dd/MM/yyyy"
 
 
 parseISO8601 : String -> Maybe Time.Posix
 parseISO8601 timestamp =
-    case Iso8601.toTime timestamp of
-        Ok posix ->
-            Just posix
-
-        Err _ ->
-            Nothing
+    Iso8601.toTime timestamp |> Result.toMaybe
 
 
 
