@@ -26,10 +26,14 @@ module.exports = {
   mode: isProduction ? 'production' : 'development',
   entry: './src/index.js',
   devServer: {
-    publicPath: '/',
-    contentBase: outputDirectory,
+    static: {
+      directory: outputDirectory
+    },
     port: 8000,
-    hotOnly: true
+    devMiddleware: {
+      publicPath: '/'
+    },
+    hot: 'only'
   },
   output: {
     publicPath: '/',
